@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import './App.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
-
+const API_URL = import.meta.env.VITE_API_URL || '';
 const ACCENTS = [
   '#4f46e5', '#7c3aed', '#06b6d4', '#10b981',
   '#f59e0b', '#ef4444', '#ec4899', '#0ea5e9',
