@@ -14,10 +14,12 @@ env:
   AWS_ACCOUNT_ID: 806157700335
 
 jobs:
+
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -26,9 +28,10 @@ jobs:
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-      
+
       - name: Check AWS identity
         run: aws sts get-caller-identity
+
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
 
@@ -53,15 +56,30 @@ jobs:
         run: |
           docker push \
             $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/backend:${{ github.sha }}
-        
-      
+
+
+  deploy-dev:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+
       - name: Configure kubectl
         run: |
           aws eks update-kubeconfig \
             --name my-app-cluster \
             --region $AWS_REGION
 
-           
       - name: Deploy frontend
         run: |
           helm upgrade --install frontend ./helm/frontend \
@@ -81,4 +99,92 @@ jobs:
       - name: Verify deployment
         run: |
           kubectl rollout status deployment/frontend -n microservices
-          kubectl rollout status deployment/backend -n microservices      
+          kubectl rollout status deployment/backend -n microservices
+
+
+  deploy-staging:
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+
+      - name: Configure kubectl
+        run: |
+          aws eks update-kubeconfig \
+            --name my-app-cluster \
+            --region $AWS_REGION
+
+      - name: Deploy frontend
+        run: |
+          helm upgrade --install frontend ./helm/frontend \
+            --namespace microservices \
+            --create-namespace \
+            -f ./helm/frontend/values-staging.yaml \
+            --set image.tag=${{ github.sha }}
+
+      - name: Deploy backend
+        run: |
+          helm upgrade --install backend ./helm/backend \
+            --namespace microservices \
+            --create-namespace \
+            -f ./helm/backend/values-staging.yaml \
+            --set image.tag=${{ github.sha }}
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/frontend -n microservices
+          kubectl rollout status deployment/backend -n microservices
+
+
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+
+      - name: Configure kubectl
+        run: |
+          aws eks update-kubeconfig \
+            --name my-app-cluster \
+            --region $AWS_REGION
+
+      - name: Deploy frontend
+        run: |
+          helm upgrade --install frontend ./helm/frontend \
+            --namespace microservices \
+            --create-namespace \
+            -f ./helm/frontend/values-prod.yaml \
+            --set image.tag=${{ github.sha }}
+
+      - name: Deploy backend
+        run: |
+          helm upgrade --install backend ./helm/backend \
+            --namespace microservices \
+            --create-namespace \
+            -f ./helm/backend/values-prod.yaml \
+            --set image.tag=${{ github.sha }}
+
+      - name: Verify deployment
+        run: |
+          kubectl rollout status deployment/frontend -n microservices
+          kubectl rollout status deployment/backend -n microservices
