@@ -1,23 +1,15 @@
-# ── Stage 1: Build ─────────────────────────────────────────────────────────────
+# ── Stage 1: Build  frontend─────────────────────────────────────────────────────────────
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy dependency manifests first (layer cache optimization)
 COPY package.json package-lock.json ./
 
-# Install all dependencies (dev deps needed for Vite build)
 RUN npm ci
 
-# Copy source files
 COPY index.html ./
 COPY vite.config.js ./
 COPY src/ ./src/
-
-# Build production bundle
-# VITE_API_URL can be overridden at build time via --build-arg
-ARG VITE_API_URL=http://localhost:4000
-ENV VITE_API_URL=$VITE_API_URL
 
 RUN npm run build
 
