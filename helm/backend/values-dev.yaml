@@ -1,0 +1,13 @@
+replicaCount: 1
+
+image:
+  repository: 806157700335.dkr.ecr.ap-south-1.amazonaws.com/backend
+  tag: v1
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 4000
+  targetPort: 4000
+
+containerPort: 4000
