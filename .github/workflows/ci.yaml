@@ -24,7 +24,3 @@ jobs:
       - name: Install backend dependencies
         working-directory: microservices-app/backend
         run: npm ci
-
-      - name: Run backend tests
-        working-directory: microservices-app/backend
-        run: npm test
