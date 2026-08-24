@@ -77,7 +77,7 @@ jobs:
       - name: Configure kubectl
         run: |
           aws eks update-kubeconfig \
-            --name my-app-cluster \
+            --name eks-microservices-platform \
             --region $AWS_REGION
 
       - name: Deploy frontend
@@ -86,7 +86,7 @@ jobs:
             --namespace microservices-dev \
             --create-namespace \
             -f ./helm/frontend/values-dev.yaml \
-            --set image.tag=${{ github.sha }}
+            --set image.tag=${{ github.sha }} \
             --atomic \
             --timeout 5m
 
@@ -96,7 +96,7 @@ jobs:
             --namespace microservices-dev \
             --create-namespace \
             -f ./helm/backend/values-dev.yaml \
-            --set image.tag=${{ github.sha }}
+            --set image.tag=${{ github.sha }} \
             --atomic \
             --timeout 5m
 
@@ -125,7 +125,7 @@ jobs:
       - name: Configure kubectl
         run: |
           aws eks update-kubeconfig \
-            --name my-app-cluster \
+            --name eks-microservices-platform \
             --region $AWS_REGION
 
       - name: Deploy frontend
@@ -134,7 +134,7 @@ jobs:
             --namespace microservices-staging \
             --create-namespace \
             -f ./helm/frontend/values-staging.yaml \
-            --set image.tag=${{ github.sha }}
+            --set image.tag=${{ github.sha }} \
             --atomic \
             --timeout 5m
 
@@ -144,7 +144,7 @@ jobs:
             --namespace microservices-staging \
             --create-namespace \
             -f ./helm/backend/values-staging.yaml \
-            --set image.tag=${{ github.sha }}
+            --set image.tag=${{ github.sha }} \
             --atomic \
             --timeout 5m
 
@@ -173,7 +173,7 @@ jobs:
       - name: Configure kubectl
         run: |
           aws eks update-kubeconfig \
-            --name my-app-cluster \
+            --name eks-microservices-platform \
             --region $AWS_REGION
 
       - name: Deploy frontend
@@ -182,7 +182,7 @@ jobs:
             --namespace microservices-prod \
             --create-namespace \
             -f ./helm/frontend/values-prod.yaml \
-            --set image.tag=${{ github.sha }}
+            --set image.tag=${{ github.sha }} \
             --atomic \
             --timeout 5m
 
@@ -192,10 +192,9 @@ jobs:
             --namespace microservices-prod \
             --create-namespace \
             -f ./helm/backend/values-prod.yaml \
-            --set image.tag=${{ github.sha }}
+            --set image.tag=${{ github.sha }} \
             --atomic \
             --timeout 5m
-            
 
       - name: Verify deployment
         run: |
