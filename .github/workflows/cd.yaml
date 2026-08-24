@@ -83,23 +83,27 @@ jobs:
       - name: Deploy frontend
         run: |
           helm upgrade --install frontend ./helm/frontend \
-            --namespace microservices \
+            --namespace microservices-dev \
             --create-namespace \
             -f ./helm/frontend/values-dev.yaml \
             --set image.tag=${{ github.sha }}
+            --atomic \
+            --timeout 5m
 
       - name: Deploy backend
         run: |
           helm upgrade --install backend ./helm/backend \
-            --namespace microservices \
+            --namespace microservices-dev \
             --create-namespace \
             -f ./helm/backend/values-dev.yaml \
             --set image.tag=${{ github.sha }}
+            --atomic \
+            --timeout 5m
 
       - name: Verify deployment
         run: |
-          kubectl rollout status deployment/frontend -n microservices
-          kubectl rollout status deployment/backend -n microservices
+          kubectl rollout status deployment/frontend -n microservices-dev
+          kubectl rollout status deployment/backend -n microservices-dev
 
 
   deploy-staging:
@@ -127,23 +131,27 @@ jobs:
       - name: Deploy frontend
         run: |
           helm upgrade --install frontend ./helm/frontend \
-            --namespace microservices \
+            --namespace microservices-staging \
             --create-namespace \
             -f ./helm/frontend/values-staging.yaml \
             --set image.tag=${{ github.sha }}
+            --atomic \
+            --timeout 5m
 
       - name: Deploy backend
         run: |
           helm upgrade --install backend ./helm/backend \
-            --namespace microservices \
+            --namespace microservices-staging \
             --create-namespace \
             -f ./helm/backend/values-staging.yaml \
             --set image.tag=${{ github.sha }}
+            --atomic \
+            --timeout 5m
 
       - name: Verify deployment
         run: |
-          kubectl rollout status deployment/frontend -n microservices
-          kubectl rollout status deployment/backend -n microservices
+          kubectl rollout status deployment/frontend -n microservices-staging
+          kubectl rollout status deployment/backend -n microservices-staging
 
 
   deploy-production:
@@ -171,20 +179,25 @@ jobs:
       - name: Deploy frontend
         run: |
           helm upgrade --install frontend ./helm/frontend \
-            --namespace microservices \
+            --namespace microservices-prod \
             --create-namespace \
             -f ./helm/frontend/values-prod.yaml \
             --set image.tag=${{ github.sha }}
+            --atomic \
+            --timeout 5m
 
       - name: Deploy backend
         run: |
           helm upgrade --install backend ./helm/backend \
-            --namespace microservices \
+            --namespace microservices-prod \
             --create-namespace \
             -f ./helm/backend/values-prod.yaml \
             --set image.tag=${{ github.sha }}
+            --atomic \
+            --timeout 5m
+            
 
       - name: Verify deployment
         run: |
-          kubectl rollout status deployment/frontend -n microservices
-          kubectl rollout status deployment/backend -n microservices
+          kubectl rollout status deployment/frontend -n microservices-prod
+          kubectl rollout status deployment/backend -n microservices-prod

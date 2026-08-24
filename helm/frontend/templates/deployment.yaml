@@ -3,8 +3,7 @@ kind: Deployment
 
 metadata:
   name: frontend
-  namespace: microservices
-
+  
 spec:
   replicas: {{ .Values.replicaCount }}
 

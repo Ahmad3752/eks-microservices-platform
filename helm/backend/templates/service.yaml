@@ -3,7 +3,6 @@ kind: Service
 
 metadata:
   name: backend-service
-  namespace: microservices
 
 spec:
   type: {{ .Values.service.type }}
